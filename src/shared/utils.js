@@ -1,5 +1,6 @@
 function logger(req){
-  console.log(`${req.httpMethod} ${req.path} - ${req.headers}`)
+  console.log(req.headers)
+  console.log(`${req.httpMethod} ${req.path} -`)
   return
 }
 
