@@ -7,7 +7,7 @@ fcc-apis
 get /
 get /json
 get /now
-get /:word/echo
+get /echo/:word
 post /name
 
 
