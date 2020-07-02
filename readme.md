@@ -14,14 +14,42 @@ To start, make sure you have NodeJS installed and a GitHub account. You can clic
 ## Function logs and the Node console
 `console.log('got here')` is probably my most used debugging tool. It's a simple way to walk through your code execution and inspect different logic paths. To view logs in Begin, go to your Begin console and inspect the route you want. Each function is isolated and has it's own execution environment. In our case, it's a Node environment. When your function is invoked with an HTTP method, AWS will bring up your function code, execute it, and wipe out it's memory. Each time that function is called, it behaves as if it is being run for the first time. This is different from a regular Express server that is long living and can retain data between route invocations. We'll talk about how to persist information in a separate repo. If you are eager to skip ahead to sessions and data persistence, check out [https://learn.begin.com](https://learn.begin.com)
 
-Let's add a `console.log()` statement to the `get-index` function. We're also going to use a helper function from `@architect/functions` which makes working with HTTP and Lambda functions more Express-like. The `arc.http.proxy` function takes a config object and a callback function, we have no config to set in this example. This proxy will serve files in `/public` when the root index is requested. Otherwise, it will ignore `public/index.html` and just return the output of the `get-index` function.
+Let's add a `console.log()` statement to the `get-index` function. 
 
 ```js
 // src/http/get-index/index.js
-let arc = require('@architect/functions')
-
-exports.handler = arc.http.proxy( {}, console.log('Praise Cage'))
+// src/http/get-index/index.js
+let body = `
+<!doctype html>
+<html lang=en>
+  <head>
+    <meta charset=utf-8>
+    <title>Hi!</title>
+    <link rel="stylesheet" href="https://static.begin.app/starter/default.css">
+    <link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" rel="icon" type="image/x-icon">
+  </head>
+  <body>
+    <h1 class="center-text">
+     Praise Cage! 
+    </h1>
+    <p class="center-text">
+      Your <a href="https://begin.com" class="link" target="_blank">Begin</a> app is ready to go!
+    </p>
+  </body>
+</html>
+`
+exports.handler = async function http(req) {
+  console.log('Praise Cage')
+  return {
+    headers: {
+      'content-type': 'text/html; charset=utf8',
+      'cache-control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
+    },
+    body
+  }
+}
 ```
+
 Now when you visit your index route you should see the console output: 
 ![Begin console function logs](screenshots/console_log_screenshot.png)
 
@@ -52,4 +80,10 @@ data
   dataID **String
   ttl TTL
 ```
-To start serving HTML and static assets like a style sheet, we can put them into the public folder.
+To start serving HTML and static assets like a style sheet, we can put them into the public folder, and refactor our `get-index` handler to proxy requests to the root at `/` with contents of the public folder. We're also going to use a helper function from `@architect/functions` which makes working with HTTP and Lambda functions more Express-like. The `arc.http.proxy` function takes a config object and a callback function, we have no config to set in this example. This proxy will serve files in `/public` when the root index is requested. Otherwise, it will ignore `public/index.html` and just return the output of the `get-index` function.
+
+```js
+// src
+let arc = require('@architect/functions')
+exports.handler = arc.http.proxy.public()
+```
