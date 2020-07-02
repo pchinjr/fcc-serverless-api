@@ -2,14 +2,22 @@
 
 ## Foundations
 The following examples are completely based on [Free Code Camp's APIs and Micro-services Certification: Basic Node and Express](https://www.freecodecamp.org/learn/apis-and-microservices/basic-node-and-express/). 
-The original challenge has twelve sections to pass. Unfortunately their test methods are not 100% compatible with a serverless backend because it is relying on a background process to test against. Serverless functions remain stateless and do not retain any memory between invocations. This means that the FCC test server can not reliably have the same results as it is written. I have however been able to replicate the entire process with Express inside of a mono-lambda. You can see that code here: [https://github.com/pchinjr/boilerplate-express](https://github.com/pchinjr/boilerplate-express)
 
-In this repo, I will document and recreate the same functionality to build an API, but with discrete architecture to include single use functions, shared middleware, and static hosting on serverless infrastructure with automated testing and deployments through [Begin](https://begin.com) and GitHub.
+The original challenge has twelve sections to pass. Unfortunately their tests are not 100% compatible because it is relying on a background process to test against. Serverless functions remain stateless and do not retain any memory between invocations. I believe the FCC test server can't get the results it needs. I have however been able to replicate the entire process with Express inside of a mono-lambda.
 
-To start, make sure you have NodeJS installed and a GitHub account. You can click the button below to create and deploy an app to live infrastructure on Begin.
+In this repo, I will document and recreate the same functionality to build an API, but with discrete architecture to include single use functions, shared middleware, and static hosting on serverless infrastructure with automated deployments through [Begin](https://begin.com) and GitHub.
+
+Click the button to deploy this app to live infrastructure on Begin.
 
 [![Deploy to Begin](https://static.begin.com/deploy-to-begin.svg)](https://begin.com/apps/create?template=https://github.com/pchinjr/fcc-apis-microservices-serverless)
 
+Once your app is deployed, clone the repo Begin provisions and `npm install`. 
+```bash
+git clone https://github.com/username/begin-app-project-name.git
+cd begin-app-project-name
+npm install
+npm start
+```
 
 ## Function logs and the Node console
 `console.log('got here')` is probably my most used debugging tool. It's a simple way to walk through your code execution and inspect different logic paths. To view logs in Begin, go to your Begin console and inspect the route you want. Each function is isolated and has it's own execution environment. In our case, it's a Node environment. When your function is invoked with an HTTP method, AWS will bring up your function code, execute it, and wipe out it's memory. Each time that function is called, it behaves as if it is being run for the first time. This is different from a regular Express server that is long living and can retain data between route invocations. We'll talk about how to persist information in a separate repo. If you are eager to skip ahead to sessions and data persistence, check out [https://learn.begin.com](https://learn.begin.com)
@@ -80,10 +88,179 @@ data
   dataID **String
   ttl TTL
 ```
-To start serving HTML and static assets like a style sheet, we can put them into the public folder, and refactor our `get-index` handler to proxy requests to the root at `/` with contents of the public folder. We're also going to use a helper function from `@architect/functions` which makes working with HTTP and Lambda functions more Express-like. The `arc.http.proxy` function takes a config object and a callback function, we have no config to set in this example. This proxy will serve files in `/public` when the root index is requested. Otherwise, it will ignore `public/index.html` and just return the output of the `get-index` function.
+To start serving HTML and static assets like a style sheet, we can put them into the public folder, and refactor our `get-index` handler to proxy requests to the root at `/` with contents of the public folder. We're also going to use a helper function from `@architect/functions` which makes working with HTTP and Lambda functions more Express-like. The `arc.http.proxy` function accepts a config object but we have no config to set in this example. This proxy will serve files in `/public` when the root index is requested. Otherwise, it would ignore `public/index.html` and just return the output of the `get-index` function.
 
 ```js
-// src
+// src/http/get-index/index.js
 let arc = require('@architect/functions')
 exports.handler = arc.http.proxy.public()
 ```
+## Serve JSON on a specific route
+
+The heart of a REST API is specifying resources with a URL path, and an HTTP method. The method is defined by `app.arc`, which tells API Gateway how to interpret the HTTP request on that route path. That path could return JSON data, an HTML string, or any other kind of text object. In this next section, we want to return JSON at the route `/json`. Setting it up means adding this route to `app.arc` and writing a `get-json` handler function.
+
+```md
+# app.arc
+@http
+get /json
+```
+```js
+// src/http/get-json/index.js
+exports.handler = async function http (req) {
+  let message = "Hello json"
+  return {
+    headers: {
+      "content-type": "application/json; charset=utf-8"
+    },
+    body: JSON.stringify({"message": message})
+  }
+}
+```
+
+## Environment Variables
+Environment variables are values that can be used during runtime. We typically hold sensitive information like API keys and configuration secrets that should not be stored in `.git`. In order to use environment variables with Sandbox, our development server, we need to create a `.arc-env` file. Then we add environment variables in the Begin Console.
+
+```
+# .arc-env
+@testing
+MESSAGE_STYLE uppercase
+```
+Now we can refactor `get-json` to check for the environment variable
+
+```js
+// src/http/get-json/index.js
+exports.handler = async function http (req) {
+  let message = "Hello json"
+
+  // new code to check for environment variable
+  if (process.env.MESSAGE_STYLE==="uppercase") {
+    message = message.toUpperCase() 
+  }
+
+  return {
+    headers: {
+      "content-type": "application/json; charset=utf-8"
+    },
+    body: JSON.stringify({"message": message})
+  }
+}
+```
+Change the environment variable in the Begin Console by navigating to "Environments", typing in your key and value, clicking add. Note that there are different areas for `staging` and `production`.
+
+![Environment Variable Screenshot](screenshots/env_var_screenshot.png)
+
+## Root-level request logger
+
+todo: capture request and route information on every visit
+
+## Middleware
+
+todo: Modify the incoming request object and pass response objects to the next function
+
+## Get route(path) parameter input from the client
+
+In this function, we will build an echo endpoint to respond with a JSON object of the word that is passed in as a request parameter. Add a new endpoint to `app.arc` and write a corresponding handler function. 
+
+```md
+# app.arc
+@http
+get /echo/:word
+```
+```js
+// src/http/get-echo-000word/index.js
+exports.handler = async function(req){
+  let { word } = req.pathParameters
+  return {
+    body: JSON.stringify({ echo: word})
+  }
+}
+```
+A GET request to `/echo/freecodecamp`, will result in a request object that has a property `pathParameters` with the object `{ word: 'freecodecamp'}` as a value. This is useful for dynamic routes like `users` or `postId` where the route can be appended with any string that you can catch and reference.
+
+## Get query parameter input from the client
+
+Another way to pass data to your API endpoint uses query parameters. We're going to add a `get-name` HTTP route with a corresponding handler. 
+
+```md
+# app.arc
+@http
+get /name
+```
+```js
+// src/http/get-name/index.js
+exports.handler = async function http(req, res) {
+  let { first, last } = req.queryStringParameters
+  return {
+    headers: {
+      'content-type':'application/json; charset=utf-8'
+    },
+    body: JSON.stringify({
+      "name": `${first} ${last}`
+    })
+  }
+}
+```
+A GET request to `/name?first=nic&last=cage`, will result in a request object that has a property `queryStringParameters` with the object `{ first: 'nic', last: 'cage' }` as a value. We can treat this similarly to route parameters.
+
+## Parse request bodies and data from POST requests
+Another way to receive data is from a POST request as an HTML form. HTML forms allow the browser to submit data to the server-side without using JavaScript. The data is part of the HTTP payload in the request body. In this example, we are using `urlencoded` body. Architect uses Base64 encoded strings for all request bodies, and we have a helper method in `@architect/functions` to help parse request bodies. Since each function is isolated, we will have to install and manage dependencies per function folder. 
+
+But first, let's set up a `post-name` function and route. 
+
+```md
+# app.arc
+@http
+post /name
+```
+Then we can install `@architect/functions` for the body parser.
+```bash
+cd src/http/post-name
+npm init -y
+npm install @architect/functions
+```
+Now let's write the function handler 
+
+```js
+// src/http/post-name
+let arc = require('@architect/functions')
+
+exports.handler = async function (req) {
+  let {first, last} = arc.http.helpers.bodyParser(req)
+  return {
+    headers: {"Content-type": "application/json; charset=UTF-8"},    
+    body: JSON.stringify({
+      name: `${first} ${last}`
+    })
+  }
+}
+```
+Now you can use `index.html` to submit a form with any name you would like, i.e. Nic Cage, and the `post-name` handler with reply with `{ "name": "Nic Cage"}`.
+
+## Infrastructure as Code
+This is a serverless approach to building a REST API and serving static assets. Take a look at your final `app.arc` file, and you will see an entire rundown of your entire app.
+
+```md
+# app.arc
+@app
+fcc-apis
+
+@static
+
+@http
+get /             # root proxy to static assets
+get /json         # deliver JSON data
+get /now          # 
+get /echo/:word   # get path parameters
+get /name         # get query string parameters
+post /name        # process html form data
+
+@tables
+data
+  scopeID *String
+  dataID **String
+  ttl TTL
+```
+
+Each commit to your default `.git` branch triggers a deploy to `staging` on Begin. When you are ready for production, click `Deploy to Production` in your Begin Console and say "Hello" to Ship-it Squirrel.
+
+>> For extra funsies, you can see the original FCC Express app with all the same capabilities, running in a single giant Lambda. You can see that code here: [https://github.com/pchinjr/boilerplate-express](https://github.com/pchinjr/boilerplate-express)
