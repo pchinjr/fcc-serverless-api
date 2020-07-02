@@ -1,6 +1,5 @@
 function logger(req){
-  console.log(req.httpMethod, req.path)
-  console.log(req.headers.Host)
+  console.log(`${req.httpMethod} ${req.path} - ${req.headers['CloudFront-Viewer-Country']}`)
   return
 }
 
