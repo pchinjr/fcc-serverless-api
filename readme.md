@@ -3,9 +3,7 @@
 ## Foundations
 The following examples are completely based on [Free Code Camp's APIs and Micro-services Certification: Basic Node and Express](https://www.freecodecamp.org/learn/apis-and-microservices/basic-node-and-express/). 
 
-The original challenge has twelve sections to pass. Unfortunately their tests are not 100% compatible because it is relying on a background process to test against. Serverless functions remain stateless and do not retain any memory between invocations. I believe the FCC test server can't get the results it needs. I have however been able to replicate the entire process with Express inside of a mono-lambda.
-
-In this repo, I will document and recreate the same functionality to build an API, but with discrete architecture to include single use functions, shared middleware, and static hosting on serverless infrastructure with automated deployments through [Begin](https://begin.com) and GitHub.
+In this repo, I will document and recreate the same functionality, but with [serverless architecture](https://arc.codes) to include single use functions, shared middleware, and static hosting with automated deployments through [Begin](https://begin.com).
 
 Click the button to deploy this app to live infrastructure on Begin.
 
@@ -25,7 +23,6 @@ npm start
 Let's add a `console.log()` statement to the `get-index` function. 
 
 ```js
-// src/http/get-index/index.js
 // src/http/get-index/index.js
 let body = `
 <!doctype html>
@@ -67,6 +64,7 @@ In the FCC Express challenge, they show you how to create a web server by instan
 
 The combination of code and the underlying infrastructure is called "Infrastructure as Code". We achieve this by writing a manifest called `app.arc`. You get a snapshot of the entire app codebase AND cloud resources in a single file 
 So let's take a look at it now. 
+
 ```md
 # app.arc
 # app namespace - this helps organize the backend resources
@@ -263,4 +261,4 @@ data
 
 Each commit to your default `.git` branch triggers a deploy to `staging` on Begin. When you are ready for production, click `Deploy to Production` in your Begin Console and say "Hello" to Ship-it Squirrel.
 
->> For extra funsies, you can see the original FCC Express app with all the same capabilities, running in a single giant Lambda. You can see that code here: [https://github.com/pchinjr/boilerplate-express](https://github.com/pchinjr/boilerplate-express)
+>> For extra funsies, you can see the original FCC Express app with all the same capabilities, running in a single giant Lambda function. You can see that code here: [https://github.com/pchinjr/boilerplate-express](https://github.com/pchinjr/boilerplate-express)
