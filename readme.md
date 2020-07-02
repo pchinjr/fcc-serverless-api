@@ -52,3 +52,5 @@ exports.handler = async function http(req) {
   }
 }
 ```
+Now when you visit your index route you should see the console output: 
+![Begin console function logs](screenshots/console_log_screenshot.png)
