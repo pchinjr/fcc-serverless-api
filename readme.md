@@ -9,7 +9,7 @@ Click the button to deploy this app to live infrastructure on Begin.
 
 [![Deploy to Begin](https://static.begin.com/deploy-to-begin.svg)](https://begin.com/apps/create?template=https://github.com/pchinjr/fcc-apis-microservices-serverless)
 
-Once your app is deployed, clone the repo Begin provisions and `npm install`. 
+Once your app is deployed, clone the repo Begin creates and `npm install`. 
 ```bash
 git clone https://github.com/username/begin-app-project-name.git
 cd begin-app-project-name
@@ -54,7 +54,6 @@ exports.handler = async function http(req) {
   }
 }
 ```
-
 Now when you visit your index route you should see the console output: 
 ![Begin console function logs](screenshots/console_log_screenshot.png)
 
@@ -67,24 +66,13 @@ So let's take a look at it now.
 
 ```md
 # app.arc
-# app namespace - this helps organize the backend resources
 @app
-fcc-apis
+fcc-apis   # app namespace - this helps organize the backend resources
 
-# declaration of static assets, defaults to the /public folder
-@static
+@static    # declaration of static assets, defaults to the /public folder
  
-# declaration of HTTP routes, each route has it's own function handler organized by folder
-@http
-get /
-# the function handler is found in /src/http/get-index/index.js
-
-# declaration of Begin Data, a DynamoDB client that gives you a persistent data store.
-@tables
-data
-  scopeID *String
-  dataID **String
-  ttl TTL
+@http      # declaration of HTTP routes, each route has it's own function handler organized by folder
+get /      # the function handler is found in /src/http/get-index/index.js
 ```
 To start serving HTML and static assets like a style sheet, we can put them into the public folder, and refactor our `get-index` handler to proxy requests to the root at `/` with contents of the public folder. We're also going to use a helper function from `@architect/functions` which makes working with HTTP and Lambda functions more Express-like. The `arc.http.proxy` function accepts a config object but we have no config to set in this example. This proxy will serve files in `/public` when the root index is requested. Otherwise, it would ignore `public/index.html` and just return the output of the `get-index` function.
 
@@ -93,9 +81,9 @@ To start serving HTML and static assets like a style sheet, we can put them into
 let arc = require('@architect/functions')
 exports.handler = arc.http.proxy.public()
 ```
-## Serve JSON on a specific route
 
-The heart of a REST API is specifying resources with a URL path, and an HTTP method. The method is defined by `app.arc`, which tells API Gateway how to interpret the HTTP request on that route path. That path could return JSON data, an HTML string, or any other kind of text object. In this next section, we want to return JSON at the route `/json`. Setting it up means adding this route to `app.arc` and writing a `get-json` handler function.
+## Serve JSON on a specific route
+The heart of a REST API is specifying resources with a URL path, and an HTTP method. The method is defined by `app.arc`, which tells API Gateway how to interpret the HTTP request on a route. That path could return JSON data, an HTML string, or any other kind of text. In this section, we want to return JSON at the route `/json`. Setting it up means adding this route to `app.arc` and writing a `get-json` handler function.
 
 ```md
 # app.arc
@@ -123,6 +111,7 @@ Environment variables are values that can be used during runtime. We typically h
 @testing
 MESSAGE_STYLE uppercase
 ```
+
 Now we can refactor `get-json` to check for the environment variable
 
 ```js
@@ -143,17 +132,31 @@ exports.handler = async function http (req) {
   }
 }
 ```
+
 Change the environment variable in the Begin Console by navigating to "Environments", typing in your key and value, clicking add. Note that there are different areas for `staging` and `production`.
 
 ![Environment Variable Screenshot](screenshots/env_var_screenshot.png)
 
-## Root-level request logger
+## Root-level request logger and middleware
 
-todo: capture request and route information on every visit
+In order to create a logger on every request, we can use a special folder called `src/shared` to create utilities that multiple functions can access. Since each function is isolated, Architect will copy everything in `src/shared` into the `node_modules` folder of every function. We will start with declaring a new route, writing a handler function, and writing a logger utility function.
 
-## Middleware
+```md
+# app.arc
+@http
+get /now
+```
+```js
+// src/shared/utils.js
 
-todo: Modify the incoming request object and pass response objects to the next function
+
+
+```
+```js
+// src/http/get-now
+
+```
+
 
 ## Get route(path) parameter input from the client
 
@@ -166,9 +169,12 @@ get /echo/:word
 ```
 ```js
 // src/http/get-echo-000word/index.js
-exports.handler = async function(req){
+exports.handler = async function http(req){
   let { word } = req.pathParameters
   return {
+    headers: {
+      'content-type':'application/json; charset=utf-8'
+    },
     body: JSON.stringify({ echo: word})
   }
 }
@@ -222,7 +228,7 @@ Now let's write the function handler
 // src/http/post-name
 let arc = require('@architect/functions')
 
-exports.handler = async function (req) {
+exports.handler = async function http(req) {
   let {first, last} = arc.http.helpers.bodyParser(req)
   return {
     headers: {"Content-type": "application/json; charset=UTF-8"},    
