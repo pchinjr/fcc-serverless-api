@@ -1,0 +1,18 @@
+html {
+  font-size: 18px;
+}
+
+body {
+  color: #333333;
+  font-family: sans-serif;
+  padding: 1rem;
+}
+
+.center-text {
+  text-align: center;
+}
+
+.link {
+  color: #0077CC;
+  text-decoration: none;
+}
