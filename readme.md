@@ -9,6 +9,8 @@ Click the button to deploy this app to live infrastructure on Begin.
 
 [![Deploy to Begin](https://static.begin.com/deploy-to-begin.svg)](https://begin.com/apps/create?template=https://github.com/pchinjr/fcc-apis-microservices-serverless)
 
+$BADGE
+
 Once your app is deployed, clone the repo Begin creates and `npm install`. 
 ```bash
 git clone https://github.com/username/begin-app-project-name.git
