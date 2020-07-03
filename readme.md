@@ -148,15 +148,57 @@ get /now
 ```
 ```js
 // src/shared/utils.js
+// takes a request and logs the HTTP method, path, and originating public IP address.
+function logger(req){
+  console.log(`${req.httpMethod} ${req.path} - ${req.headers['X-Forwarded-For']}`)
+  return
+}
 
-
-
+module.exports = logger
 ```
+
+Now you can add `logger()` to any function you want by requiring it at the top.
+
 ```js
 // src/http/get-now
+let logger = require('@architect/shared/utils')
 
+exports.handler = async function http(req) {
+  logger(req)
+  let time = new Date().toString()
+  return {
+    headers: {
+      "content-type":"application/json; charset=utf-8"
+    },
+    body: `Praise Cage! The time is: ${time}`
+  }
+}
 ```
 
+If you need to chain multiple operations in a single lambda, you can also use Express style middleware with `arc.http(req, res, next)`. So we could recreate the time server with a middleware helper. 
+```js
+// src/http/get-now/index.js
+
+// npm install @architect/functions to the function folder so we can require it
+let arc = require('@architect/functions')
+
+// first function call to modify the req object
+function time(req, res, next) {
+  req.time = new Date().toString()
+  next()
+}
+
+// response function with response object
+function http(req, res) {
+  let time = `Praise Cage! The time is: ${req.time}`
+  res({
+    "json": {time: time}
+  })
+}
+
+exports.handler = arc.http(time, http)
+```
+To learn more about the `arc.http` request and response methods, check out https://arc.codes/reference/functions/http/node/classic
 
 ## Get route(path) parameter input from the client
 
