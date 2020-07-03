@@ -3,10 +3,14 @@
   "version": "0.0.0",
   "description": "Begin basic Hello World! app for Node",
   "scripts": {
-    "start": "cross-env NODE_ENV=testing npx sandbox"
+    "start": "cross-env NODE_ENV=testing npx sandbox",
+    "test": "QUIET=1 tape test/*-test.js | tap-spec"
   },
   "devDependencies": {
     "@architect/sandbox": "latest",
-    "cross-env": "^7.0.2"
+    "cross-env": "^7.0.2",
+    "tap-spec": "^5.0.0",
+    "tape": "^5.0.1",
+    "tiny-json-http": "^7.2.0"
   }
 }
