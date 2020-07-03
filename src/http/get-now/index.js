@@ -1,16 +1,4 @@
 let logger = require('@architect/shared/utils')
-
-// exports.handler = async function http(req) {
-//   logger(req)
-//   let time = new Date().toString()
-//   return {
-//     headers: {
-//       "content-type":"application/json; charset=utf-8"
-//     },
-//     body: `Praise Cage! The time is: ${time}`
-//   }
-// }
-
 let arc = require('@architect/functions')
 
 // first function call to modify the req object

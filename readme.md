@@ -157,29 +157,18 @@ function logger(req){
 module.exports = logger
 ```
 
-Now you can add `logger()` to any function you want by requiring it at the top.
+Now you can add `logger()` to any function you want by requiring it at the top. We can combine the shared code with an Express style middleware in `@architect/functions` to complete the next challenge. 
 
-```js
-// src/http/get-now
-let logger = require('@architect/shared/utils')
-
-exports.handler = async function http(req) {
-  logger(req)
-  let time = new Date().toString()
-  return {
-    headers: {
-      "content-type":"application/json; charset=utf-8"
-    },
-    body: `Praise Cage! The time is: ${time}`
-  }
-}
+```bash
+cd src/http/get-now/
+npm init -y
+npm install @architect/functions
 ```
-
-If you need to chain multiple operations in a single lambda, you can also use Express style middleware with `arc.http(req, res, next)`. So we could recreate the time server with a middleware helper. 
 ```js
 // src/http/get-now/index.js
 
-// npm install @architect/functions to the function folder so we can require it
+// require logger and @architect/functions
+let logger = require('@architect/shared/utils')
 let arc = require('@architect/functions')
 
 // first function call to modify the req object
@@ -196,9 +185,12 @@ function http(req, res) {
   })
 }
 
+// arc.http registers multiple functions and executes them in order
 exports.handler = arc.http(time, http)
 ```
-To learn more about the `arc.http` request and response methods, check out https://arc.codes/reference/functions/http/node/classic
+`arc.http` registers multiple functions. Each function will get executed to modify the `req` object. If a function does not end the request/response cycle, it must call `next()` and the final function must call `res()`
+
+To learn more about the `arc.http` request and response methods, check out https://arc.codes/reference/functions/http/node/classic. 
 
 ## Get route(path) parameter input from the client
 
