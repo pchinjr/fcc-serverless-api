@@ -35,7 +35,11 @@ test('get-json', async t => {
   t.plan(1)
   try {
     let result = await tiny.get({url: `${base}/json`})
-    t.equal(result.body.message, 'HELLO JSON', 'json matches')
+    if (process.env.MESSAGE_STYLE) {
+      t.equal(result.body.message, 'HELLO JSON', 'json matches')
+    } else {
+      t.equal(result.body.message,'Hello json', 'json matches')
+    }
   } catch(err) {
     t.fail(err)
   }
