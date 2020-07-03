@@ -61,7 +61,8 @@ Now when you visit your index route you should see the console output:
 
 In the FCC Express challenge, they show you how to create a web server by instantiating Express and opening a port for the server to listen on. With serverless functions, you don't need to create that abstraction. HTTP requests are handled by AWS API Gateway, a service that acts like a web server. When users make a request, each route is handled by a specific Lambda function. This gives us the ability to only write logic that pertains to the request and response needed by that route. It also has added security because the control of that function is only allowed by your app on your Begin domain. Architect takes care of IAM roles and service permissions when your code is deployed. 
 
-The combination of code and the underlying infrastructure is called "Infrastructure as Code". We achieve this by writing a manifest called `app.arc`. You get a snapshot of the entire app codebase AND cloud resources in a single file 
+The combination of code and the underlying infrastructure is called "Infrastructure as Code". We achieve this by writing a manifest called `app.arc` in the root of the project. Architect captures cloud resources and associated function code in a single file. 
+
 So let's take a look at it now. 
 
 ```md
@@ -74,8 +75,11 @@ fcc-apis   # app namespace - this helps organize the backend resources
 @http      # declaration of HTTP routes, each route has it's own function handler organized by folder
 get /      # the function handler is found in /src/http/get-index/index.js
 ```
-To start serving HTML and static assets like a style sheet, we can put them into the public folder, and refactor our `get-index` handler to proxy requests to the root at `/` with contents of the public folder. We're also going to use a helper function from `@architect/functions` which makes working with HTTP and Lambda functions more Express-like. The `arc.http.proxy` function accepts a config object but we have no config to set in this example. This proxy will serve files in `/public` when the root index is requested. Otherwise, it would ignore `public/index.html` and just return the output of the `get-index` function.
+Each function is self contained in it's own function folder according to route and HTTP method. One failing function won't take down the entire app, just the code behind that route. 
 
+To start serving HTML and static assets, we can put them into the `/public` folder, and refactor our `get-index` handler to proxy requests to the root with contents of the public folder. We're also going to use a helper function from `@architect/functions` which makes working with HTTP and Lambda functions more Express-like. The `arc.http.proxy` function accepts a config object but we have no config to set in this example. This proxy will serve files in `/public` when the root index is requested. Otherwise, it would ignore `public/index.html` and just return the output of the `get-index` function.
+
+So now we can modify our original `get-index` function to only the following:
 ```js
 // src/http/get-index/index.js
 let arc = require('@architect/functions')
@@ -104,7 +108,7 @@ exports.handler = async function http (req) {
 ```
 
 ## Environment Variables
-Environment variables are values that can be used during runtime. We typically hold sensitive information like API keys and configuration secrets that should not be stored in `.git`. In order to use environment variables with Sandbox, our development server, we need to create a `.arc-env` file. Then we add environment variables in the Begin Console.
+Environment variables are values that can be used during runtime. We typically hold sensitive information like API keys and configuration secrets that should not be stored in `.git`. In order to use environment variables with Sandbox, our development server, we need to create a `.arc-env` file. Then we can add `staging` and `production` environment variables in the Begin Console.
 
 ```
 # .arc-env
@@ -112,7 +116,7 @@ Environment variables are values that can be used during runtime. We typically h
 MESSAGE_STYLE uppercase
 ```
 
-Now we can refactor `get-json` to check for the environment variable
+Refactor `get-json` to check for the environment variable `MESSAGE_STATUS`
 
 ```js
 // src/http/get-json/index.js
@@ -132,8 +136,7 @@ exports.handler = async function http (req) {
   }
 }
 ```
-
-Change the environment variable in the Begin Console by navigating to "Environments", typing in your key and value, clicking add. Note that there are different areas for `staging` and `production`.
+Add the environment variable in the Begin Console by navigating to "Environments", typing in your key and value, and clicking `add`. Note that there are different areas for `staging` and `production`.
 
 ![Environment Variable Screenshot](screenshots/env_var_screenshot.png)
 

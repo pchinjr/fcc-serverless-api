@@ -32,4 +32,4 @@ exports.handler = async function http(req) {
 
 // uncomment for section on static assets
 // let arc = require('@architect/functions')
-// exports.handler = arc.http.proxy.public()
+// exports.handler = arc.http.proxy()
