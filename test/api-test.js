@@ -55,7 +55,6 @@ test('get-name', async t => {
   }
 })
 
-
 test('post-name', async t => {
   t.plan(1)
   try {

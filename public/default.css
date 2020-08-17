@@ -16,3 +16,7 @@ body {
   color: #0077CC;
   text-decoration: none;
 }
+
+img {
+  width: 100%
+}
