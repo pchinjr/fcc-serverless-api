@@ -18,6 +18,9 @@ cd begin-app-project-name
 npm install
 npm start
 ```
+## Why have I done this?
+Serverless is another tool for web developers to develop applications and deploy them to scalable infrastructure. I got started using FreeCodeCamp and I am forever grateful for the resources and time that all the volunteers have put into it. I wanted to encourage new developers to take a look at developing with cloud functions instead of long lived stateful server processes. This means building APIs and backend systems with a different mindset. In this project, the FCC API is replicated using serverless technologies and deployed with Begin CI/CD. 
+
 
 ## Function logs and the Node console
 `console.log('got here')` is probably my most used debugging tool. It's a simple way to walk through your code execution and inspect different logic paths. To view logs in Begin, go to your Begin console and inspect the route you want. Each function is isolated and has it's own execution environment. In our case, it's a Node environment. When your function is invoked with an HTTP method, AWS will bring up your function code, execute it, and wipe out it's memory. Each time that function is called, it behaves as if it is being run for the first time. This is different from a regular Express server that is long living and can retain data between route invocations. We'll talk about how to persist information in a separate repo. If you are eager to skip ahead to sessions and data persistence, check out [https://learn.begin.com](https://learn.begin.com)
