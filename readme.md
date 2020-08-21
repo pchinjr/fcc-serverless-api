@@ -75,6 +75,7 @@ let body = `
 exports.handler = async function http(req) {
   console.log('Praise Cage')
   return {
+    statusCode: 200,
     headers: {
       'content-type': 'text/html; charset=utf8',
       'cache-control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0'
@@ -123,6 +124,7 @@ get /json
 exports.handler = async function http (req) {
   let message = "Praise Cage!"
   return {
+    statusCode: 200,
     headers: {
       "content-type": "application/json; charset=utf-8"
     },
@@ -153,6 +155,7 @@ exports.handler = async function http (req) {
   }
 
   return {
+    statusCode: 200
     headers: {
       "content-type": "application/json; charset=utf-8"
     },
@@ -175,8 +178,8 @@ get /now
 ```
 ```js
 // src/shared/utils.js
-// takes a request and logs the HTTP method, path, and originating public IP address.
 function logger(req){
+  // takes a request and logs the HTTP method, path, and originating public IP address.
   console.log(`${req.httpMethod} ${req.path} - ${req.headers['X-Forwarded-For']}`)
   return
 }
@@ -233,6 +236,7 @@ get /echo/:word
 exports.handler = async function http(req){
   let { word } = req.pathParameters
   return {
+    statusCode: 200,
     headers: {
       'content-type':'application/json; charset=utf-8'
     },
@@ -256,6 +260,7 @@ get /name
 exports.handler = async function http(req, res) {
   let { first, last } = req.queryStringParameters
   return {
+    statusCode: 200,
     headers: {
       'content-type':'application/json; charset=utf-8'
     },
@@ -265,7 +270,7 @@ exports.handler = async function http(req, res) {
   }
 }
 ```
-A GET request to `/name?first=nic&last=cage`, will result in a request object that has a property `queryStringParameters` with the object `{ first: 'nic', last: 'cage' }` as a value. We can treat this similarly to route parameters.
+A GET request to `/name?first=nic&last=cage`, will result in a request object that has a property `queryStringParameters` with the object `{ first: 'nic', last: 'cage' }` as a value. We can treat this similarly to route parameters. A query parameter can give the backend certain keys to filter or sort items.
 
 ## Parse request bodies and data from POST requests
 Another way to receive data is from a POST request as an HTML form. HTML forms allow the browser to submit data to the server-side without using JavaScript. The data is part of the HTTP payload in the request body. In this example, we are using `urlencoded` body. Architect uses Base64 encoded strings for all request bodies, and we have a helper method in `@architect/functions` to help parse request bodies. Since each function is isolated, we will have to install and manage dependencies per function folder.
@@ -292,6 +297,7 @@ let arc = require('@architect/functions')
 exports.handler = async function http(req) {
   let {first, last} = arc.http.helpers.bodyParser(req)
   return {
+    statusCode: 200,
     headers: {"Content-type": "application/json; charset=UTF-8"},
     body: JSON.stringify({
       name: `${first} ${last}`
@@ -314,16 +320,10 @@ fcc-apis
 @http
 get /             # root proxy to static assets
 get /json         # deliver JSON data
-get /now          #
+get /now          # middleware example
 get /echo/:word   # get path parameters
 get /name         # get query string parameters
-post /name        # process html form data
-
-@tables
-data
-  scopeID *String
-  dataID **String
-  ttl TTL
+post /name        # process HTML Form data
 ```
 
 Each commit to your default `.git` branch triggers a deploy to `staging` on Begin. When you are ready for production, click `Deploy to Production` in your Begin Console and say "Hello" to Ship-it Squirrel.
