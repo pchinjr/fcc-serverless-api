@@ -5,7 +5,7 @@ The following examples are completely based on [Free Code Camp's APIs and Micro-
 
 In this repo, I will document and recreate the same functionality, but with [serverless architecture](https://arc.codes) to include single use functions, shared middleware, and static hosting with automated deployments through [Begin](https://begin.com).
 
-Click the button to deploy this app to live infrastructure on Begin.
+Click the button to deploy this app to live infrastructure with Begin.
 
 [![Deploy to Begin](https://static.begin.com/deploy-to-begin.svg)](https://begin.com/apps/create?template=https://github.com/pchinjr/fcc-serverless-api)
 
