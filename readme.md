@@ -121,7 +121,7 @@ get /json
 ```js
 // src/http/get-json/index.js
 exports.handler = async function http (req) {
-  let message = "Hello json"
+  let message = "Praise Cage!"
   return {
     headers: {
       "content-type": "application/json; charset=utf-8"
