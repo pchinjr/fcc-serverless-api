@@ -7,7 +7,7 @@ In this repo, I will document and recreate the same functionality, but with [ser
 
 Click the button to deploy this app to live infrastructure on Begin.
 
-[![Deploy to Begin](https://static.begin.com/deploy-to-begin.svg)](https://begin.com/apps/create?template=https://github.com/pchinjr/fcc-apis-microservices-serverless)
+[![Deploy to Begin](https://static.begin.com/deploy-to-begin.svg)](https://begin.com/apps/create?template=https://github.com/pchinjr/fcc-serverless-api)
 
 [![Begin build status](https://buildstatus.begin.app/create-ys3/status.svg)](https://begin.com)
 
