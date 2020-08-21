@@ -10,7 +10,7 @@ let body = `
 	</head>
 	<body>
     <h1>Hello Beginners!</h1>
-    <img height="600" src="_static/me_begin.jpg">
+    <img src="_static/me_begin.jpg">
 		<p>Oh yea, wait a minute</p>
      <form action="/name" method="post">
       <label>First Name :</label>
