@@ -1,5 +1,5 @@
 function logger(req){
-  console.log(`${req.httpMethod} ${req.path} - ${req.headers['X-Forwarded-For']}`)
+  console.log(`Method: ${req.httpMethod} - Path: ${req.path} - IP: ${req.headers['X-Forwarded-For']}`)
   return
 }
 
