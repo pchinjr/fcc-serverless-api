@@ -55,19 +55,9 @@ test('get-name', async t => {
   }
 })
 
-test('post-name', async t => {
-  t.plan(1)
-  try {
-    let result = await tiny.post({url: `${base}/name`, data: {"first":"nic", "last":"cage"}})
-    t.equal(result.body.name, 'nic cage', 'post form name matches')
-  } catch(err) {
-    t.fail(err)
-  }
-})
-
 // this ends sandbox
 test('end', async t=> {
   t.plan(1)
-  await end()
+  await sandbox.end()
   t.ok(true, 'ended')
 })
